@@ -39,6 +39,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 /* ── FORM ── */
 .fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;}
+.fg.config-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
 .f-full{grid-column:1/-1;}
 .fl{display:flex;flex-direction:column;gap:5px;}
 .fl label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
@@ -201,6 +202,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 @media(max-width:640px){
   .hdr{gap:10px;flex-wrap:wrap;position:static;}
   .hdr-badge{margin-left:0;}
+  .fg.config-grid{grid-template-columns:1fr;}
   .up-t{font-size:14px;}
   .step{padding:12px;}
 }
@@ -230,7 +232,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <!-- CONFIG -->
   <div class="card">
     <div class="ctitle">⚙️ Configuration</div>
-    <div class="fg">
+    <div class="fg config-grid">
       <div class="fl f-full">
         <label for="apiKey">Gemini API Key</label>
         <input type="password" id="apiKey" placeholder="AIzaSy...">
@@ -240,7 +242,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
         <label for="mdl">AI Model</label>
         <select id="mdl">
           <option value="gemini-2.0-flash" selected>⚡ Gemini 2.0 Flash (Recommended)</option>
-          <option value="gemini-1.5-pro">🔹 Gemini 1.5 Pro (More thorough)</option>
+          <option value="gemini-2.0-flash-lite">🔹 Gemini 2.0 Flash Lite (Budget option)</option>
           <option value="gemini-1.5-flash">🔸 Gemini 1.5 Flash (Fastest)</option>
         </select>
       </div>
@@ -645,7 +647,7 @@ function parseJSON(raw) {
   }
 
   try { return JSON.parse(repair(s)); } catch(e2) {
-    throw new Error('AI response was truncated. Try Gemini 1.5 Pro which handles larger outputs. Preview: '+s.substring(0,250));
+    throw new Error('AI response was truncated. Try Gemini 2.0 Flash again or split the PDF into smaller parts. Preview: '+s.substring(0,250));
   }
 }
 
