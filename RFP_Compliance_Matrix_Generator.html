@@ -28,7 +28,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
 
 /* ── LAYOUT ── */
-.main{width:min(100%,1100px);margin:clamp(14px,2.5vw,28px) auto;padding:0 clamp(12px,2.5vw,18px) 60px;display:flex;flex-direction:column;gap:18px;}
+.main{width:min(100%,900px);margin:clamp(14px,2.5vw,28px) auto;padding:0 clamp(12px,2.5vw,18px) 60px;display:flex;flex-direction:column;gap:18px;}
 
 /* ── CARD ── */
 .card{background:var(--card);border-radius:14px;padding:clamp(16px,2.3vw,24px);
@@ -43,8 +43,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .fl{display:flex;flex-direction:column;gap:5px;}
 .fl label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .fl input,.fl select{padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;
-  font-size:14px;min-height:44px;outline:none;transition:border-color .2s,box-shadow .2s;color:var(--text);}
+  font-size:14px;min-height:44px;transition:border-color .2s,box-shadow .2s,color .2s,outline-color .2s;color:var(--text);}
 .fl input:focus,.fl select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(68,114,196,.13);}
+.fl input:focus-visible,.fl select:focus-visible{outline:2px solid rgba(68,114,196,.45);outline-offset:1px;}
 .hint{font-size:10px;color:var(--muted);}
 
 /* ── UPLOAD ── */
@@ -252,13 +253,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <!-- UPLOAD -->
   <div class="card">
     <div class="ctitle">📄 Upload RFP Document</div>
-    <div class="upzone" id="upzone" role="button" tabindex="0" aria-label="Upload RFP PDF">
+    <label class="upzone" id="upzone" for="rfpFile" aria-label="Upload RFP PDF">
       <input type="file" id="rfpFile" accept="application/pdf">
       <div class="up-icon" id="upIco">📂</div>
       <div class="up-t" id="upT">Click to browse or drag & drop your RFP</div>
       <div class="up-s" id="upS">PDF format only</div>
       <div class="up-tag">PDF</div>
-    </div>
+    </label>
     <div class="fstrip" id="fstrip">
       <div class="fstrip-ico">📄</div>
       <div>
@@ -365,10 +366,6 @@ const zone = document.getElementById('upzone');
 const inp  = document.getElementById('rfpFile');
 const apiKeyInput = document.getElementById('apiKey');
 
-zone.addEventListener('click', () => inp.click());
-zone.addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inp.click(); }
-});
 inp.addEventListener('change', e => { if(e.target.files[0]) setFile(e.target.files[0]); });
 apiKeyInput.addEventListener('input', updateGenerateState);
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
@@ -406,7 +403,11 @@ const fmtBytes = b => b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFi
 function updateGenerateState() {
   const hasKey = document.getElementById('apiKey').value.trim().length > 0;
   const hasFile = !!curFile;
-  document.getElementById('genBtn').disabled = !(hasKey && hasFile);
+  const disabled = !(hasKey && hasFile);
+  const btn = document.getElementById('genBtn');
+  btn.disabled = disabled;
+  btn.setAttribute('aria-disabled', String(disabled));
+  btn.title = disabled ? 'Enter API key and upload a PDF to enable generation.' : 'Generate compliance matrix';
 }
 
 /* ═══════════════════════ STEPS ═══════════════════════ */
@@ -839,7 +840,7 @@ function sheet3(wb, data, num, short) {
   ws.views=[{state:'frozen',ySplit:2}];
 }
 
-updateGenerateState();
+window.addEventListener('DOMContentLoaded', updateGenerateState);
 </script>
 </body>
 </html>
