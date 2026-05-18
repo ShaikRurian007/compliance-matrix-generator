@@ -106,6 +106,7 @@ Use this checklist to integrate the completed bot into your Teams tenant.
    - Optional commands:
      - `key <value>`
      - `model flash` / `model flash-lite` / `model 1.5-flash`
+       (aliases that resolve to `gemini-2.0-flash`, `gemini-2.0-flash-lite`, and `gemini-1.5-flash`)
      - `reset`
 
 ## GitHub Actions deployment
