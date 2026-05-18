@@ -1,4 +1,6 @@
 function parseJSON(raw) {
+  const MAX_REPAIR_LENGTH = 1_000_000;
+
   if (!raw || !String(raw).trim()) {
     throw new Error('Empty AI response. Try again with a smaller PDF or a different Gemini model.');
   }
@@ -21,6 +23,9 @@ function parseJSON(raw) {
   }
 
   source = source.slice(start);
+  if (source.length > MAX_REPAIR_LENGTH) {
+    throw new Error('AI response was too large to repair safely. Try a smaller PDF or a different Gemini model.');
+  }
 
   function repair(truncated) {
     const stack = [];

@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "check": "node --check index.js && node --check bot.js && node --check gemini.js && node --check parseJSON.js && node --check buildExcel.js"
+    "check": "node --check index.js && node --check bot.js && node --check gemini.js && node --check parseJSON.js && node --check buildExcel.js && node --check prompt.js"
   },
   "engines": {
     "node": ">=20"
