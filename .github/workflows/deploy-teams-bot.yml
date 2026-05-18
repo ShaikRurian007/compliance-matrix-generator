@@ -1,0 +1,52 @@
+name: Build and deploy Teams bot
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "teams-bot/**"
+      - ".github/workflows/deploy-teams-bot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AZURE_WEBAPP_NAME: ${{ vars.AZURE_TEAMS_BOT_WEBAPP_NAME }}
+  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_TEAMS_BOT_PUBLISH_PROFILE }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: teams-bot
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: teams-bot/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate bot source
+        run: npm run check
+
+      - name: Skip deploy when Azure settings are missing
+        if: ${{ env.AZURE_WEBAPP_NAME == '' || env.AZURE_WEBAPP_PUBLISH_PROFILE == '' }}
+        run: echo "Skipping deploy because AZURE_TEAMS_BOT_WEBAPP_NAME or AZURE_TEAMS_BOT_PUBLISH_PROFILE is not configured."
+
+      - name: Deploy to Azure Web App
+        if: ${{ env.AZURE_WEBAPP_NAME != '' && env.AZURE_WEBAPP_PUBLISH_PROFILE != '' }}
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./teams-bot

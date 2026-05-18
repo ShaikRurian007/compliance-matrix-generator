@@ -1,0 +1,23 @@
+{
+  "name": "teams-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Microsoft Teams bot for generating RFP compliance matrices from PDF uploads",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "check": "node --check index.js && node --check bot.js && node --check gemini.js && node --check parseJSON.js && node --check buildExcel.js && node --check prompt.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "axios": "^1.16.1",
+    "botbuilder": "^4.23.3",
+    "botframework-connector": "^4.23.3",
+    "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "form-data": "^4.0.5"
+  }
+}
