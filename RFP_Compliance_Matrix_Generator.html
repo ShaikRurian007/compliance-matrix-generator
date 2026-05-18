@@ -253,7 +253,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <!-- UPLOAD -->
   <div class="card">
     <div class="ctitle">📄 Upload RFP Document</div>
-    <label class="upzone" id="upzone" for="rfpFile" aria-label="Upload RFP PDF">
+    <label class="upzone" id="upzone" for="rfpFile">
       <input type="file" id="rfpFile" accept="application/pdf">
       <div class="up-icon" id="upIco">📂</div>
       <div class="up-t" id="upT">Click to browse or drag & drop your RFP</div>
@@ -406,7 +406,6 @@ function updateGenerateState() {
   const disabled = !(hasKey && hasFile);
   const btn = document.getElementById('genBtn');
   btn.disabled = disabled;
-  btn.setAttribute('aria-disabled', String(disabled));
   btn.title = disabled ? 'Enter API key and upload a PDF to enable generation.' : 'Generate compliance matrix';
 }
 
