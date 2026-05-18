@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFP Compliance Matrix Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<style>
+:root {
+  --navy:#1F3864; --navy2:#2d5a8e; --blue:#4472C4;
+  --orange:#e85d26; --green:#1e8449; --green2:#27ae60;
+  --red:#c0392b; --yellow:#f39c12;
+  --bg:#eaeff7; --card:#fff; --border:#cdd5e0;
+  --text:#1a2535; --muted:#6b7a99;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);
+  padding:18px 36px;display:flex;align-items:center;gap:14px;
+  box-shadow:0 3px 16px rgba(0,0,0,.28);position:sticky;top:0;z-index:100;}
+.hdr-icon{width:44px;height:44px;background:rgba(255,255,255,.13);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.hdr h1{color:#fff;font-size:19px;font-weight:700;}
+.hdr p{color:rgba(255,255,255,.65);font-size:11px;margin-top:2px;}
+.hdr-badge{margin-left:auto;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
+
+/* ── LAYOUT ── */
+.main{max-width:780px;margin:28px auto;padding:0 18px 60px;display:flex;flex-direction:column;gap:18px;}
+
+/* ── CARD ── */
+.card{background:var(--card);border-radius:14px;padding:22px 24px;
+  box-shadow:0 2px 10px rgba(0,0,0,.07);border:1px solid var(--border);}
+.ctitle{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;
+  color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.ctitle::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── FORM ── */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.f-full{grid-column:1/-1;}
+.fl{display:flex;flex-direction:column;gap:5px;}
+.fl label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.fl input,.fl select{padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s;color:var(--text);}
+.fl input:focus,.fl select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(68,114,196,.13);}
+.hint{font-size:10px;color:var(--muted);}
+
+/* ── UPLOAD ── */
+.upzone{border:2px dashed var(--border);border-radius:10px;padding:40px 20px;text-align:center;
+  cursor:pointer;transition:all .2s;background:#f8fafd;position:relative;}
+.upzone:hover{border-color:var(--blue);background:#f0f4fc;}
+.upzone.drag{border-color:var(--orange);background:#fff8f5;}
+.upzone.ready{border-color:var(--green);background:#f0faf4;border-style:solid;}
+.upzone input[type=file]{display:none;}
+.up-icon{font-size:48px;line-height:1;margin-bottom:10px;transition:transform .3s;}
+.upzone:hover .up-icon{transform:translateY(-3px);}
+.upzone.ready .up-icon{animation:iconPop .4s ease;}
+@keyframes iconPop{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+.up-t{font-size:15px;font-weight:700;margin-bottom:5px;}
+.up-s{font-size:12px;color:var(--muted);}
+.up-tag{display:inline-block;background:#fee2d1;color:var(--orange);
+  font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;margin-top:8px;}
+
+.fstrip{display:none;align-items:center;gap:11px;padding:11px 15px;
+  background:#f0faf4;border:1px solid #86efac;border-radius:9px;margin-top:11px;}
+.fstrip.vis{display:flex;}
+.fstrip-ico{font-size:26px;}
+.fstrip-nm{font-weight:700;font-size:13px;}
+.fstrip-sz{font-size:11px;color:var(--muted);margin-top:2px;}
+.fstrip-rm{margin-left:auto;cursor:pointer;color:#ef4444;font-size:17px;padding:4px 6px;border-radius:6px;}
+.fstrip-rm:hover{background:#fee2e2;}
+
+/* ── GENERATE BUTTON ── */
+.btn-gen{width:100%;padding:15px;
+  background:linear-gradient(135deg,var(--orange) 0%,#c0451a 100%);
+  color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;
+  justify-content:center;gap:10px;
+  box-shadow:0 4px 14px rgba(232,93,38,.35);}
+.btn-gen:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 22px rgba(232,93,38,.4);}
+.btn-gen:active:not(:disabled){transform:translateY(0);}
+.btn-gen:disabled{background:#c5cbd6;box-shadow:none;cursor:not-allowed;}
+
+/* ── ERROR ── */
+.errbox{display:none;padding:13px 16px;background:#fff5f5;border:1px solid #fca5a5;
+  border-radius:10px;color:#b91c1c;font-size:12px;line-height:1.6;}
+.errbox.vis{display:block;}
+
+/* ══════════════════════════════════
+   PROGRESS CARD WITH ANIMATIONS
+══════════════════════════════════ */
+.prog-card{display:none;}
+.prog-card.vis{display:block;}
+
+/* overall progress bar */
+.prog-bar-wrap{background:#eef2f7;border-radius:8px;height:6px;margin-bottom:20px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--blue),var(--navy));
+  width:0%;transition:width .5s ease;}
+
+.steps{display:flex;flex-direction:column;gap:10px;}
+
+/* base step */
+.step{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:11px;
+  background:#f4f6fb;border:1.5px solid var(--border);transition:all .35s;}
+
+.step.active{background:#eff6ff;border-color:#93c5fd;
+  box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+.step.done  {background:#f0faf4;border-color:#86efac;}
+.step.errored{background:#fff5f5;border-color:#fca5a5;}
+
+/* step icon wrapper — holds spinner ring + emoji */
+.sico{position:relative;width:42px;height:42px;flex-shrink:0;}
+
+/* background circle */
+.sico-bg{position:absolute;inset:0;border-radius:50%;background:var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .35s;}
+.step.active  .sico-bg{background:#dbeafe;}
+.step.done    .sico-bg{background:#dcfce7;}
+.step.errored .sico-bg{background:#fee2e2;}
+
+/* spinning ring — only visible when active */
+.sico-ring{position:absolute;inset:0;border-radius:50%;
+  border:3px solid transparent;
+  border-top-color:var(--blue);
+  border-right-color:#93c5fd;
+  opacity:0;transition:opacity .3s;}
+.step.active .sico-ring{opacity:1;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* check pop when done */
+.step.done .sico-bg::after{
+  content:'✓';font-size:20px;font-weight:900;color:var(--green);
+  animation:checkPop .35s cubic-bezier(.175,.885,.32,1.275);}
+.step.done .sico-emoji{display:none;}
+
+@keyframes checkPop{
+  0%{transform:scale(0) rotate(-20deg);opacity:0}
+  100%{transform:scale(1) rotate(0);opacity:1}
+}
+
+/* error shake */
+.step.errored .sico-bg{animation:shake .4s ease;}
+.step.errored .sico-bg::after{content:'✕';font-size:18px;font-weight:900;color:var(--red);}
+.step.errored .sico-emoji{display:none;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.sico-emoji{font-size:18px;}
+
+/* text */
+.stxt{flex:1;}
+.slbl{font-weight:700;font-size:13px;}
+.ssub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* animated dots for active step */
+.sdots{display:none;gap:3px;margin-top:5px;}
+.step.active .sdots{display:flex;}
+.sdots span{width:5px;height:5px;border-radius:50%;background:var(--blue);
+  animation:dot 1.2s infinite;}
+.sdots span:nth-child(2){animation-delay:.2s;}
+.sdots span:nth-child(3){animation-delay:.4s;}
+@keyframes dot{0%,80%,100%{transform:scale(.8);opacity:.4}40%{transform:scale(1.2);opacity:1}}
+
+/* time badge */
+.stime{font-size:10px;color:var(--muted);font-weight:700;white-space:nowrap;}
+
+/* ── SUCCESS ── */
+.suc-card{display:none;}
+.suc-card.vis{display:block;}
+.suc-banner{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;
+  padding:20px 22px;border-radius:11px;margin-bottom:18px;
+  display:flex;align-items:center;gap:14px;}
+.suc-icon{font-size:38px;}
+.suc-banner h3{font-size:17px;font-weight:800;}
+.suc-banner p{font-size:12px;opacity:.85;margin-top:3px;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:17px;}
+.stat{text-align:center;padding:15px;background:#f8f9fb;border-radius:9px;border:1px solid var(--border);}
+.stat-n{font-size:28px;font-weight:900;color:var(--navy);}
+.stat-l{font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;}
+.btn-dl{width:100%;padding:13px;background:linear-gradient(135deg,var(--navy),var(--navy2));
+  color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  box-shadow:0 4px 14px rgba(31,56,100,.22);transition:all .2s;}
+.btn-dl:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(31,56,100,.28);}
+.btn-new{width:100%;padding:11px;background:#fff;color:var(--navy);
+  border:2px solid var(--navy);border-radius:10px;font-size:13px;
+  font-weight:700;cursor:pointer;margin-top:9px;transition:all .2s;}
+.btn-new:hover{background:#f0f4fc;}
+
+.foot{text-align:center;font-size:10px;color:var(--muted);padding:10px;
+  background:var(--card);border-radius:10px;border:1px solid var(--border);}
+
+@media(max-width:580px){
+  .fg{grid-template-columns:1fr;}
+  .stats{grid-template-columns:1fr;}
+  .hdr{padding:14px 18px;}
+  .main{margin:14px auto;}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-icon">📋</div>
+  <div>
+    <h1>RFP Compliance Matrix Generator</h1>
+    <p>AI-powered · Google Gemini · Professional Excel output</p>
+  </div>
+  <div class="hdr-badge">v3.0</div>
+</div>
+
+<div class="main">
+
+  <!-- CONFIG -->
+  <div class="card">
+    <div class="ctitle">⚙️ Configuration</div>
+    <div class="fg">
+      <div class="fl f-full">
+        <label>Gemini API Key</label>
+        <input type="password" id="apiKey" placeholder="AIzaSy...">
+        <span class="hint">🔒 Sent only to Google's API — never stored anywhere.</span>
+      </div>
+      <div class="fl">
+        <label>AI Model</label>
+        <select id="mdl">
+          <option value="gemini-2.0-flash" selected>⚡ Gemini 2.0 Flash (Recommended)</option>
+          <option value="gemini-1.5-pro">🔹 Gemini 1.5 Pro (More thorough)</option>
+          <option value="gemini-1.5-flash">🔸 Gemini 1.5 Flash (Fastest)</option>
+        </select>
+      </div>
+      <div class="fl">
+        <label>Contractor / Company Name <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <input type="text" id="contractor" placeholder="e.g., Clean Harbors Environmental Services">
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div class="card">
+    <div class="ctitle">📄 Upload RFP Document</div>
+    <div class="upzone" id="upzone">
+      <input type="file" id="rfpFile" accept="application/pdf">
+      <div class="up-icon" id="upIco">📂</div>
+      <div class="up-t" id="upT">Click to browse or drag & drop your RFP</div>
+      <div class="up-s" id="upS">PDF format only</div>
+      <div class="up-tag">PDF</div>
+    </div>
+    <div class="fstrip" id="fstrip">
+      <div class="fstrip-ico">📄</div>
+      <div>
+        <div class="fstrip-nm" id="fname"></div>
+        <div class="fstrip-sz" id="fsize"></div>
+      </div>
+      <div class="fstrip-rm" onclick="rmFile()" title="Remove">✕</div>
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <button class="btn-gen" id="genBtn" onclick="go()">
+    <span>🚀</span> Generate Compliance Matrix
+  </button>
+
+  <!-- ERROR -->
+  <div class="errbox" id="errbox"></div>
+
+  <!-- PROGRESS -->
+  <div class="card prog-card" id="progCard">
+    <div class="ctitle">⏳ Generating Matrix</div>
+    <div class="prog-bar-wrap"><div class="prog-bar" id="progBar"></div></div>
+    <div class="steps">
+
+      <div class="step" id="s1">
+        <div class="sico">
+          <div class="sico-bg"><span class="sico-emoji">📤</span></div>
+          <div class="sico-ring"></div>
+        </div>
+        <div class="stxt">
+          <div class="slbl">Preparing Document</div>
+          <div class="ssub">Encoding PDF for AI submission</div>
+          <div class="sdots"><span></span><span></span><span></span></div>
+        </div>
+        <div class="stime" id="t1"></div>
+      </div>
+
+      <div class="step" id="s2">
+        <div class="sico">
+          <div class="sico-bg"><span class="sico-emoji">🤖</span></div>
+          <div class="sico-ring"></div>
+        </div>
+        <div class="stxt">
+          <div class="slbl">AI Analyzing RFP</div>
+          <div class="ssub">Reading every requirement, clause & deadline</div>
+          <div class="sdots"><span></span><span></span><span></span></div>
+        </div>
+        <div class="stime" id="t2"></div>
+      </div>
+
+      <div class="step" id="s3">
+        <div class="sico">
+          <div class="sico-bg"><span class="sico-emoji">📊</span></div>
+          <div class="sico-ring"></div>
+        </div>
+        <div class="stxt">
+          <div class="slbl">Structuring Matrix</div>
+          <div class="ssub">Organising General, Detailed & Checklist sections</div>
+          <div class="sdots"><span></span><span></span><span></span></div>
+        </div>
+        <div class="stime" id="t3"></div>
+      </div>
+
+      <div class="step" id="s4">
+        <div class="sico">
+          <div class="sico-bg"><span class="sico-emoji">💾</span></div>
+          <div class="sico-ring"></div>
+        </div>
+        <div class="stxt">
+          <div class="slbl">Building Excel File</div>
+          <div class="ssub">Applying professional formatting, colours & section groups</div>
+          <div class="sdots"><span></span><span></span><span></span></div>
+        </div>
+        <div class="stime" id="t4"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="card suc-card" id="sucCard">
+    <div class="suc-banner">
+      <div class="suc-icon">✅</div>
+      <div>
+        <h3>Compliance Matrix Ready!</h3>
+        <p id="sucDesc">Excel downloaded automatically.</p>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <button class="btn-dl" id="dlBtn">⬇️ Download Excel Again</button>
+    <button class="btn-new" onclick="reset()">+ Analyse Another RFP</button>
+  </div>
+
+  <div class="foot">🔐 All processing is local in your browser. No RFP data is stored or sent to any server except Google's API.</div>
+</div>
+
+<script>
+/* ═══════════════════════ STATE ═══════════════════════ */
+let curFile = null, lastBuf = null, lastFn = '';
+const timers = {};
+
+/* ═══════════════════════ UPLOAD ═══════════════════════ */
+const zone = document.getElementById('upzone');
+const inp  = document.getElementById('rfpFile');
+
+zone.addEventListener('click', () => inp.click());
+inp.addEventListener('change', e => { if(e.target.files[0]) setFile(e.target.files[0]); });
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if(f && f.type === 'application/pdf') setFile(f);
+  else showErr('Please drop a PDF file.');
+});
+
+function setFile(f) {
+  curFile = f;
+  zone.classList.add('ready');
+  document.getElementById('upIco').textContent = '✅';
+  document.getElementById('upT').textContent   = 'PDF ready — click Generate to start';
+  document.getElementById('upS').textContent   = f.name;
+  document.getElementById('fname').textContent = f.name;
+  document.getElementById('fsize').textContent = fmtBytes(f.size);
+  document.getElementById('fstrip').classList.add('vis');
+  hideErr();
+}
+function rmFile() {
+  curFile = null; inp.value = '';
+  zone.classList.remove('ready');
+  document.getElementById('upIco').textContent = '📂';
+  document.getElementById('upT').textContent   = 'Click to browse or drag & drop your RFP';
+  document.getElementById('upS').textContent   = 'PDF format only';
+  document.getElementById('fstrip').classList.remove('vis');
+}
+const fmtBytes = b => b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB';
+
+/* ═══════════════════════ STEPS ═══════════════════════ */
+function setStep(n, state) { // 'active'|'done'|'errored'
+  const el = document.getElementById('s'+n);
+  el.className = 'step ' + state;
+  if(state === 'active') timers[n] = Date.now();
+  if(state === 'done' && timers[n])
+    document.getElementById('t'+n).textContent = ((Date.now()-timers[n])/1000).toFixed(1)+'s';
+  // progress bar: 25% per done step
+  const done = [1,2,3,4].filter(i => document.getElementById('s'+i).classList.contains('done')).length;
+  document.getElementById('progBar').style.width = (done*25)+'%';
+}
+function resetSteps() {
+  for(let i=1;i<=4;i++){
+    document.getElementById('s'+i).className='step';
+    document.getElementById('t'+i).textContent='';
+  }
+  document.getElementById('progBar').style.width='0%';
+}
+
+/* ═══════════════════════ ERROR/UI ═══════════════════════ */
+function showErr(m){ const b=document.getElementById('errbox'); b.innerHTML='❌ '+m; b.classList.add('vis'); }
+function hideErr(){ document.getElementById('errbox').classList.remove('vis'); }
+
+/* ═══════════════════════ MAIN FLOW ═══════════════════════ */
+async function go() {
+  const key = document.getElementById('apiKey').value.trim();
+  const mdl = document.getElementById('mdl').value;
+  hideErr();
+  document.getElementById('sucCard').classList.remove('vis');
+  document.getElementById('progCard').classList.remove('vis');
+  resetSteps();
+
+  if(!key)     { showErr('Please enter your Gemini API key.'); return; }
+  if(!curFile) { showErr('Please upload an RFP PDF file first.'); return; }
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  document.getElementById('progCard').classList.add('vis');
+
+  try {
+    setStep(1,'active');
+    const b64 = await toB64(curFile);
+    setStep(1,'done');
+
+    setStep(2,'active');
+    const raw = await callGemini(b64, mdl, key);
+    setStep(2,'done');
+
+    setStep(3,'active');
+    const data = parseJSON(raw);
+    await sleep(350);
+    setStep(3,'done');
+
+    setStep(4,'active');
+    const cont = document.getElementById('contractor').value.trim();
+    const {buf, fn} = await buildExcel(data, curFile.name, cont);
+    lastBuf = buf; lastFn = fn;
+    download(buf, fn);
+    setStep(4,'done');
+
+    document.getElementById('dlBtn').onclick = () => download(lastBuf, lastFn);
+    showSuccess(data, fn);
+
+  } catch(e) {
+    console.error(e);
+    for(let i=1;i<=4;i++)
+      if(document.getElementById('s'+i).classList.contains('active')) setStep(i,'errored');
+    showErr(e.message || String(e));
+  } finally { btn.disabled = false; }
+}
+
+function reset() {
+  rmFile(); hideErr();
+  document.getElementById('sucCard').classList.remove('vis');
+  document.getElementById('progCard').classList.remove('vis');
+  resetSteps();
+}
+
+function showSuccess(data, fn) {
+  const det   = (data.detailed  || []).filter(r => !r.isHeader);
+  const chk   = (data.checklist || []).filter(r => !r.isHeader);
+  const act   = det.filter(r => normStatus(r.status) === 'Action Required').length;
+  document.getElementById('sucDesc').textContent = `"${fn}" — ${det.length} requirements across 3 sheets.`;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-n">${det.length}</div><div class="stat-l">Requirements</div></div>
+    <div class="stat"><div class="stat-n" style="color:#c0451a">${act}</div><div class="stat-l">Action Required</div></div>
+    <div class="stat"><div class="stat-n">${chk.length}</div><div class="stat-l">Checklist Items</div></div>`;
+  document.getElementById('sucCard').classList.add('vis');
+}
+
+/* ═══════════════════════ UTILS ═══════════════════════ */
+const toB64 = f => new Promise((res,rej) => {
+  const r = new FileReader(); r.readAsDataURL(f);
+  r.onload  = () => res(r.result.split(',')[1]);
+  r.onerror = () => rej(new Error('Failed to read file'));
+});
+const sleep = ms => new Promise(r => setTimeout(r,ms));
+
+function download(buf, fn) {
+  const blob = new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=fn; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 6000);
+}
+
+/* Normalise status: strip any leading emoji Gemini might add */
+function normStatus(raw) {
+  return (raw||'').trim()
+    .replace(/^[✅⚠❌🔶🔹]\s*/u,'')
+    .replace(/^(Compliant|Action Required|TBD|N\/A[^,]*)/,'$1');
+}
+
+/* ═══════════════════════ GEMINI API ═══════════════════════ */
+async function callGemini(b64, mdl, key) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${mdl}:generateContent?key=${key}`;
+
+  const prompt = `You are a senior compliance and proposal manager with deep expertise in government RFP analysis.
+Analyze the attached RFP document THOROUGHLY and return ONLY a valid JSON object — no markdown, no code fences, no preamble.
+
+JSON SCHEMA (follow exactly):
+{
+  "rfpTitle": "Full program/project name",
+  "rfpNumber": "Proposal/RFP number",
+  "clientName": "Full official client name",
+  "clientShortName": "Short client name (e.g. Cattaraugus County – DPW)",
+  "submissionDeadline": "Full deadline text",
+  "general": [
+    {"srNo":1,"field":"Category","details":"Comprehensive details. Use 1. 2. 3. for multiple points.","rfpPage":"Page X","notes":"⚠ warning or empty string"}
+  ],
+  "detailed": [
+    {"isHeader":true,"section":"SECTION NAME IN UPPERCASE"},
+    {"isHeader":false,"no":1,"requirement":"Full requirement text","rfpSection":"Section ref","rfpPage":"Page X","status":"Compliant","notes":""}
+  ],
+  "checklist": [
+    {"isHeader":true,"section":"SECTION NAME IN UPPERCASE"},
+    {"isHeader":false,"no":1,"deliverable":"Document or deliverable name","rfpPage":"Page X","status":"Action Required","notes":""}
+  ]
+}
+
+CRITICAL — status field must be EXACTLY one of these four values (no emoji, no extra text):
+  Compliant
+  Action Required
+  TBD
+  N/A – County
+
+GENERAL SHEET — extract ALL of these fields:
+1. Scope of Work — multi-point summary of all services required
+2. Client Contact — name, email, phone
+3. Delivery / Submission Address — full mailing address
+4. Bid Due Date — exact date and time (notes: ⚠ Hard deadline – no exceptions)
+5. Submission Format — copies required, labeling requirements
+6. Event / Project Date & Location — dates, times, site address
+7. Contract Duration & Extensions — base term, renewal options, escalation cap
+8. Experience Requirements — minimum qualifications, references
+9. Bid Bond / Performance Bond — required or not
+10. Evaluation Criteria — how proposals are scored
+11. Required Deliverables — ALL forms and documents to submit
+12. Key Contractor Obligations — top-level duties specific to this RFP
+Add additional fields for any other unique summary items.
+
+DETAILED SHEET — extract EVERY requirement grouped into sections. Use these section headers:
+• SUBMISSION REQUIREMENTS
+• REQUIRED FORMS & CERTIFICATIONS
+• GENERAL INFORMATION / PROGRAM REQUIREMENTS
+• SCOPE OF SERVICES
+• CONTRACTOR RESPONSIBILITIES
+• PROPOSAL REQUIREMENTS & QUALIFICATIONS
+• PRICING / APPENDIX (all items status = "Action Required")
+• INSURANCE REQUIREMENTS
+• LEGAL & REGULATORY COMPLIANCE
+• COUNTY / CLIENT RESPONSIBILITIES (all items status = "N/A – County")
+Number items from 1 within each section. Do NOT skip or combine — each is a separate row.
+
+CHECKLIST SHEET — ALL deliverables the proposer must submit, grouped into:
+• REQUIRED FORMS
+• CERTIFICATIONS & LEGAL DOCUMENTS
+• INSURANCE DOCUMENTS
+• QUALIFICATIONS & EXPERIENCE
+• TECHNICAL & OPERATIONAL INFORMATION
+• PRICING DOCUMENTS
+• OPTIONAL / ADDITIONAL
+Number items from 1 within each section. Populate this section FULLY — do not leave it empty.
+
+Be exhaustive. Extract every individual requirement as its own row.`;
+
+  const body = {
+    contents:[{parts:[{text:prompt},{inline_data:{mime_type:'application/pdf',data:b64}}]}],
+    generationConfig:{response_mime_type:'application/json',temperature:0.1,maxOutputTokens:16384}
+  };
+
+  const resp = await fetch(url, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!resp.ok){ const j=await resp.json().catch(()=>({})); throw new Error(j?.error?.message||`API HTTP ${resp.status}`); }
+  const result = await resp.json();
+  if(result.error) throw new Error(result.error.message);
+  const txt = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if(!txt) throw new Error('No content returned from Gemini. Check your API key or try a different model.');
+  return txt;
+}
+
+/* ═══════════════════════ JSON PARSE (resilient) ═══════════════════════ */
+function parseJSON(raw) {
+  let s = raw.trim().replace(/^```[a-z]*\n?/i,'').replace(/```\s*$/,'').trim();
+  try { return JSON.parse(s); } catch(_) {}
+
+  // Auto-repair truncated JSON
+  const start = s.indexOf('{');
+  if(start===-1) throw new Error('No JSON found in AI response. Try re-running.');
+  s = s.slice(start);
+
+  function repair(src) {
+    const stack=[]; let inStr=false, esc=false;
+    for(let i=0;i<src.length;i++){
+      const c=src[i];
+      if(esc){esc=false;continue;}
+      if(c==='\\'&&inStr){esc=true;continue;}
+      if(c==='"'){inStr=!inStr;continue;}
+      if(inStr) continue;
+      if(c==='{')stack.push('}');
+      else if(c==='[')stack.push(']');
+      else if(c==='}'||c===']')stack.pop();
+    }
+    if(inStr) src+='"';
+    src=src.replace(/,\s*$/,'');
+    return src+stack.reverse().join('');
+  }
+
+  try { return JSON.parse(repair(s)); } catch(e2) {
+    throw new Error('AI response was truncated. Try Gemini 1.5 Pro which handles larger outputs. Preview: '+s.substring(0,250));
+  }
+}
+
+/* ═══════════════════════ EXCEL COLOURS ═══════════════════════ */
+const CLR = {
+  navyBg:'FF1F3864', navyFg:'FFFFFFFF',
+  blueBg:'FF2F5496', blueFg:'FFFFFFFF',
+  sectBg:'FFD6DCE4', sectFg:'FF1F3864',  // dark section header bg
+
+  // status
+  comFill:'FFE2EFDA', comFont:'FF375623',   // green
+  actFill:'FFFCE4D6', actFont:'FF843C0C',   // orange
+  tbdFill:'FFFFF2CC', tbdFont:'FF7F6000',   // yellow
+  naFill: 'FFF2F2F2', naFont: 'FF595959',   // grey
+  exFill: 'FFFFD7D7', exFont: 'FF9C0006',   // red
+
+  rowAlt: 'FFF4F6FB', rowWht: 'FFFFFFFF',
+  border: 'FFB8C4D4',
+};
+
+function thin(argb){ return {style:'thin',color:{argb:argb||CLR.border}}; }
+function allBorder(cell){ cell.border={top:thin(),bottom:thin(),left:thin(),right:thin()}; }
+
+function applyStatus(cell, rawStatus) {
+  const s = normStatus(rawStatus);
+  let fill, font, label;
+  if(s==='Compliant')         { fill=CLR.comFill; font=CLR.comFont; label='✅  Compliant'; }
+  else if(s==='Action Required'){fill=CLR.actFill; font=CLR.actFont; label='⚠  Action Required'; }
+  else if(s==='TBD')          { fill=CLR.tbdFill; font=CLR.tbdFont; label='TBD'; }
+  else if(s.startsWith('N/A')){ fill=CLR.naFill;  font=CLR.naFont;  label='N/A – County'; }
+  else                        { fill=CLR.exFill;  font=CLR.exFont;  label='❌  Exception'; }
+  cell.value = label;
+  cell.fill  = {type:'pattern',pattern:'solid',fgColor:{argb:fill}};
+  cell.font  = {bold:true,color:{argb:font},size:9,name:'Calibri'};
+  cell.alignment = {horizontal:'center',vertical:'middle',wrapText:true};
+  allBorder(cell);
+}
+
+function titleRow(ws, text, nc, h) {
+  const rn = ws.rowCount+1;
+  ws.mergeCells(rn,1,rn,nc);
+  const row = ws.getRow(rn); row.height = h||30;
+  const c   = row.getCell(1);
+  c.value     = text;
+  c.fill      = {type:'pattern',pattern:'solid',fgColor:{argb:CLR.navyBg}};
+  c.font      = {bold:true,color:{argb:CLR.navyFg},size:12,name:'Calibri'};
+  c.alignment = {vertical:'middle',horizontal:'center',wrapText:true};
+  c.border    = {top:thin(CLR.navyBg),bottom:thin(CLR.navyBg),left:thin(CLR.navyBg),right:thin(CLR.navyBg)};
+}
+
+function legendRow(ws, text, nc) {
+  const rn = ws.rowCount+1;
+  ws.mergeCells(rn,1,rn,nc);
+  const row = ws.getRow(rn); row.height=16;
+  const c   = row.getCell(1);
+  c.value     = text;
+  c.fill      = {type:'pattern',pattern:'solid',fgColor:{argb:CLR.tbdFill}};
+  c.font      = {italic:true,size:9,color:{argb:CLR.tbdFont},name:'Calibri'};
+  c.alignment = {vertical:'middle',horizontal:'center'};
+  allBorder(c);
+}
+
+function headerRow(ws, labels, widths) {
+  ws.columns = widths.map(w => ({width:w}));
+  const row  = ws.addRow(labels); row.height=20;
+  row.eachCell(c => {
+    c.fill  = {type:'pattern',pattern:'solid',fgColor:{argb:CLR.blueBg}};
+    c.font  = {bold:true,color:{argb:CLR.blueFg},size:10,name:'Calibri'};
+    c.alignment = {vertical:'middle',horizontal:'center',wrapText:true};
+    c.border = {top:thin(CLR.blueBg),bottom:thin(CLR.border),left:thin(CLR.border),right:thin(CLR.border)};
+  });
+}
+
+function sectionRow(ws, text, nc) {
+  const rn = ws.rowCount+1;
+  ws.mergeCells(rn,1,rn,nc);
+  const row = ws.getRow(rn); row.height=18;
+  const c   = row.getCell(1);
+  c.value     = '  ' + text;
+  c.fill      = {type:'pattern',pattern:'solid',fgColor:{argb:CLR.sectBg}};
+  c.font      = {bold:true,color:{argb:CLR.sectFg},size:9.5,name:'Calibri'};
+  c.alignment = {vertical:'middle',horizontal:'left',wrapText:true};
+  c.border    = {top:thin('FF8496AF'),bottom:thin('FF8496AF'),left:thin('FF8496AF'),right:thin('FF8496AF')};
+}
+
+function dataCell(cell, val, isAlt, align) {
+  cell.value = val||'';
+  cell.fill  = {type:'pattern',pattern:'solid',fgColor:{argb:isAlt?CLR.rowAlt:CLR.rowWht}};
+  cell.font  = {size:10,name:'Calibri'};
+  cell.alignment = {wrapText:true,vertical:'top',horizontal:align||'left'};
+  allBorder(cell);
+}
+
+/* ═══════════════════════ EXCEL BUILD ═══════════════════════ */
+async function buildExcel(data, srcName, contractor) {
+  const wb  = new ExcelJS.Workbook();
+  wb.creator='RFP Matrix Generator v3'; wb.created=new Date();
+
+  const num   = data.rfpNumber    || 'N/A';
+  const short = data.clientShortName || data.clientName || '';
+  const title = data.rfpTitle || 'Request for Proposal';
+
+  sheet1(wb, data, title, num, short);
+  sheet2(wb, data, num, short);
+  sheet3(wb, data, num, short);
+
+  const safe = srcName.replace(/\.pdf$/i,'').replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,38);
+  const fn   = `Compliance_Matrix_RFP${num}_${safe}.xlsx`;
+  const buf  = await wb.xlsx.writeBuffer();
+  return {buf, fn};
+}
+
+/* ── Sheet 1 ── */
+function sheet1(wb, data, title, num, short) {
+  const ws = wb.addWorksheet('Compliance Matrix General');
+  const NC = 5;
+
+  titleRow(ws, `REQUEST FOR PROPOSAL  ·  ${title}  ·  ${short}  |  Proposal No. ${num}`, NC, 34);
+  headerRow(ws, ['Sr. No','Field','Details','RFP Page','Notes'], [8,22,72,13,34]);
+
+  (data.general||[]).forEach((item,i) => {
+    const isAlt = i%2===1;
+    const row = ws.addRow([]); row.height=42;
+    dataCell(row.getCell(1), item.srNo||(i+1), isAlt, 'center');
+    dataCell(row.getCell(2), item.field||'', isAlt);
+    dataCell(row.getCell(3), item.details||'', isAlt);
+    dataCell(row.getCell(4), item.rfpPage||'', isAlt, 'center');
+    // Notes cell
+    const nc = row.getCell(5);
+    dataCell(nc, item.notes||'', isAlt);
+    if((item.notes||'').startsWith('⚠')) {
+      nc.font = {size:10,name:'Calibri',bold:true,color:{argb:CLR.actFont}};
+      nc.fill = {type:'pattern',pattern:'solid',fgColor:{argb:CLR.actFill}};
+    }
+    // Field cell bold
+    row.getCell(2).font = {size:10,name:'Calibri',bold:true};
+  });
+
+  ws.views=[{state:'frozen',ySplit:2}];
+}
+
+/* ── Sheet 2 ── */
+function sheet2(wb, data, num, short) {
+  const ws = wb.addWorksheet('Compliance Matrix Detailed');
+  const NC = 6;
+
+  titleRow(ws, `COMPLIANCE MATRIX  ·  ${short}  |  RFP No. ${num}`, NC, 34);
+  legendRow(ws, 'Legend:   ✅ Compliant   |   ⚠ Action Required   |   ❌ Exception   |   TBD = To Be Determined   |   N/A = County Responsibility', NC);
+  headerRow(ws, ['#','Requirement','RFP Section','RFP Page','Status','Notes / Action Required'], [6,65,19,12,22,36]);
+
+  let sec=0;
+  (data.detailed||[]).forEach(item => {
+    if(item.isHeader){ sectionRow(ws, item.section||'', NC); sec=0; return; }
+    sec++;
+    const isAlt=sec%2===0;
+    const row=ws.addRow([]); row.height=38;
+    const nc=row.getCell(1);
+    dataCell(nc, item.no||sec, isAlt, 'center');
+    nc.font={size:10,name:'Calibri',bold:true,color:{argb:CLR.sectFg}};
+    dataCell(row.getCell(2), item.requirement||'', isAlt);
+    dataCell(row.getCell(3), item.rfpSection||'', isAlt, 'center');
+    dataCell(row.getCell(4), item.rfpPage||'', isAlt, 'center');
+    applyStatus(row.getCell(5), item.status);
+    if(isAlt) row.getCell(5).fill={type:'pattern',pattern:'solid',fgColor:{argb:row.getCell(5).fill.fgColor.argb}}; // keep status colour
+    dataCell(row.getCell(6), item.notes||'', isAlt);
+    // highlight action notes
+    if((item.notes||'').length>0 && normStatus(item.status)==='Action Required') {
+      row.getCell(6).font={size:10,name:'Calibri',bold:true,color:{argb:CLR.actFont}};
+    }
+  });
+
+  ws.views=[{state:'frozen',ySplit:3}];
+}
+
+/* ── Sheet 3 ── */
+function sheet3(wb, data, num, short) {
+  const ws = wb.addWorksheet('Proposal Checklist');
+  const NC = 5;
+
+  titleRow(ws, `PROPOSAL SUBMISSION CHECKLIST  ·  ${short}  |  RFP No. ${num}`, NC, 34);
+  headerRow(ws, ['#','Deliverable / Document','RFP Page','Status','Notes'], [6,54,13,22,34]);
+
+  let sec=0;
+  (data.checklist||[]).forEach(item => {
+    if(item.isHeader){ sectionRow(ws, item.section||'', NC); sec=0; return; }
+    sec++;
+    const isAlt=sec%2===0;
+    const row=ws.addRow([]); row.height=34;
+    const nc=row.getCell(1);
+    dataCell(nc, item.no||sec, isAlt, 'center');
+    nc.font={size:10,name:'Calibri',bold:true,color:{argb:CLR.sectFg}};
+    dataCell(row.getCell(2), item.deliverable||'', isAlt);
+    dataCell(row.getCell(3), item.rfpPage||'', isAlt, 'center');
+    applyStatus(row.getCell(4), item.status);
+    dataCell(row.getCell(5), item.notes||'', isAlt);
+  });
+
+  ws.views=[{state:'frozen',ySplit:2}];
+}
+</script>
+</body>
+</html>
