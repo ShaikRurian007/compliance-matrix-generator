@@ -51,12 +51,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 /* ── UPLOAD ── */
 .upzone{border:2px dashed var(--border);border-radius:10px;padding:clamp(24px,5vw,40px) 20px;text-align:center;
-  cursor:pointer;transition:all .2s;background:#f8fafd;position:relative;}
+  cursor:pointer;transition:all .2s;background:#f8fafd;position:relative;width:100%;font:inherit;color:inherit;}
 .upzone:focus-visible{outline:3px solid rgba(68,114,196,.32);outline-offset:2px;}
 .upzone:hover{border-color:var(--blue);background:#f0f4fc;}
 .upzone.drag{border-color:var(--orange);background:#fff8f5;}
 .upzone.ready{border-color:var(--green);background:#f0faf4;border-style:solid;}
-.upzone input[type=file]{display:none;}
+#rfpFile{display:none;}
 .up-icon{font-size:48px;line-height:1;margin-bottom:10px;transition:transform .3s;}
 .upzone:hover .up-icon{transform:translateY(-3px);}
 .upzone.ready .up-icon{animation:iconPop .4s ease;}
@@ -254,13 +254,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <!-- UPLOAD -->
   <div class="card">
     <div class="ctitle">📄 Upload RFP Document</div>
-    <label class="upzone" id="upzone" for="rfpFile" tabindex="0">
-      <input type="file" id="rfpFile" accept="application/pdf">
+    <input type="file" id="rfpFile" accept="application/pdf">
+    <button type="button" class="upzone" id="upzone" aria-label="Upload RFP PDF">
       <div class="up-icon" id="upIco">📂</div>
       <div class="up-t" id="upT">Click to browse or drag & drop your RFP</div>
       <div class="up-s" id="upS">PDF format only</div>
       <div class="up-tag">PDF</div>
-    </label>
+    </button>
     <div class="fstrip" id="fstrip">
       <div class="fstrip-ico">📄</div>
       <div>
@@ -368,12 +368,7 @@ const zone = document.getElementById('upzone');
 const inp  = document.getElementById('rfpFile');
 const apiKeyInput = document.getElementById('apiKey');
 
-zone.addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    inp.click();
-  }
-});
+zone.addEventListener('click', () => inp.click());
 inp.addEventListener('change', e => { if(e.target.files[0]) setFile(e.target.files[0]); });
 apiKeyInput.addEventListener('input', updateGenerateState);
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
@@ -413,7 +408,11 @@ function updateGenerateState() {
   const hasFile = !!curFile;
   const disabled = !(hasKey && hasFile);
   const btn = document.getElementById('genBtn');
+  const hint = document.getElementById('genHint');
   btn.disabled = disabled;
+  hint.textContent = disabled
+    ? 'Enter API key and upload a PDF to enable this button.'
+    : 'Ready to generate your compliance matrix.';
   btn.title = disabled ? 'Enter API key and upload a PDF to enable generation.' : 'Generate compliance matrix';
 }
 
