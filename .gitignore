@@ -1,0 +1,3 @@
+teams-bot/node_modules/
+teams-bot/.env
+npm-debug.log*
