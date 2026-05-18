@@ -39,6 +39,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 /* ── FORM ── */
 .fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;}
+.fg.config-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
 .f-full{grid-column:1/-1;}
 .fl{display:flex;flex-direction:column;gap:5px;}
 .fl label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
@@ -201,6 +202,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 @media(max-width:640px){
   .hdr{gap:10px;flex-wrap:wrap;position:static;}
   .hdr-badge{margin-left:0;}
+  .fg.config-grid{grid-template-columns:1fr;}
   .up-t{font-size:14px;}
   .step{padding:12px;}
 }
@@ -230,7 +232,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <!-- CONFIG -->
   <div class="card">
     <div class="ctitle">⚙️ Configuration</div>
-    <div class="fg">
+    <div class="fg config-grid">
       <div class="fl f-full">
         <label for="apiKey">Gemini API Key</label>
         <input type="password" id="apiKey" placeholder="AIzaSy...">
