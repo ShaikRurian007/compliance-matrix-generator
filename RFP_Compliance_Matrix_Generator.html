@@ -47,6 +47,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .fl input:focus,.fl select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(68,114,196,.13);}
 .fl input:focus-visible,.fl select:focus-visible{outline:2px solid rgba(68,114,196,.45);outline-offset:1px;}
 .hint{font-size:10px;color:var(--muted);}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 
 /* ── UPLOAD ── */
 .upzone{border:2px dashed var(--border);border-radius:10px;padding:clamp(24px,5vw,40px) 20px;text-align:center;
@@ -253,7 +254,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <!-- UPLOAD -->
   <div class="card">
     <div class="ctitle">📄 Upload RFP Document</div>
-    <label class="upzone" id="upzone" tabindex="0">
+    <label class="upzone" id="upzone" for="rfpFile" tabindex="0">
       <input type="file" id="rfpFile" accept="application/pdf">
       <div class="up-icon" id="upIco">📂</div>
       <div class="up-t" id="upT">Click to browse or drag & drop your RFP</div>
@@ -271,9 +272,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
 
   <!-- GENERATE -->
-  <button class="btn-gen" id="genBtn" onclick="go()" disabled>
+  <button class="btn-gen" id="genBtn" onclick="go()" disabled aria-describedby="genHint">
     <span>🚀</span> Generate Compliance Matrix
   </button>
+  <span class="sr-only" id="genHint">Enter API key and upload a PDF to enable this button.</span>
 
   <!-- ERROR -->
   <div class="errbox" id="errbox" role="alert" aria-live="polite"></div>
@@ -367,7 +369,7 @@ const inp  = document.getElementById('rfpFile');
 const apiKeyInput = document.getElementById('apiKey');
 
 zone.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
+  if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
     inp.click();
   }
