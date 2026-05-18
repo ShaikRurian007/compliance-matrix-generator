@@ -254,7 +254,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <!-- UPLOAD -->
   <div class="card">
     <div class="ctitle">📄 Upload RFP Document</div>
-    <input type="file" id="rfpFile" accept="application/pdf">
+    <input type="file" id="rfpFile" accept="application/pdf" aria-label="Upload RFP PDF file">
     <button type="button" class="upzone" id="upzone" aria-label="Upload RFP PDF">
       <div class="up-icon" id="upIco">📂</div>
       <div class="up-t" id="upT">Click to browse or drag & drop your RFP</div>
@@ -275,7 +275,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <button class="btn-gen" id="genBtn" onclick="go()" disabled aria-describedby="genHint">
     <span>🚀</span> Generate Compliance Matrix
   </button>
-  <span class="sr-only" id="genHint">Enter API key and upload a PDF to enable this button.</span>
+  <span class="sr-only" id="genHint"></span>
 
   <!-- ERROR -->
   <div class="errbox" id="errbox" role="alert" aria-live="polite"></div>
@@ -362,6 +362,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 /* ═══════════════════════ STATE ═══════════════════════ */
 let curFile = null, lastBuf = null, lastFn = '';
 const timers = {};
+const GEN_HINT_DISABLED = 'Enter API key and upload a PDF to enable this button.';
+const GEN_HINT_READY = 'Ready to generate your compliance matrix.';
 
 /* ═══════════════════════ UPLOAD ═══════════════════════ */
 const zone = document.getElementById('upzone');
@@ -410,9 +412,7 @@ function updateGenerateState() {
   const btn = document.getElementById('genBtn');
   const hint = document.getElementById('genHint');
   btn.disabled = disabled;
-  hint.textContent = disabled
-    ? 'Enter API key and upload a PDF to enable this button.'
-    : 'Ready to generate your compliance matrix.';
+  hint.textContent = disabled ? GEN_HINT_DISABLED : GEN_HINT_READY;
   btn.title = disabled ? 'Enter API key and upload a PDF to enable generation.' : 'Generate compliance matrix';
 }
 
