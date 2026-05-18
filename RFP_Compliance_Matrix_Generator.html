@@ -253,7 +253,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <!-- UPLOAD -->
   <div class="card">
     <div class="ctitle">📄 Upload RFP Document</div>
-    <label class="upzone" id="upzone" for="rfpFile" tabindex="0">
+    <label class="upzone" id="upzone" tabindex="0">
       <input type="file" id="rfpFile" accept="application/pdf">
       <div class="up-icon" id="upIco">📂</div>
       <div class="up-t" id="upT">Click to browse or drag & drop your RFP</div>
@@ -271,7 +271,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
 
   <!-- GENERATE -->
-  <button class="btn-gen" id="genBtn" onclick="go()" disabled aria-disabled="true">
+  <button class="btn-gen" id="genBtn" onclick="go()" disabled>
     <span>🚀</span> Generate Compliance Matrix
   </button>
 
@@ -367,7 +367,7 @@ const inp  = document.getElementById('rfpFile');
 const apiKeyInput = document.getElementById('apiKey');
 
 zone.addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ' ') {
+  if (e.key === 'Enter') {
     e.preventDefault();
     inp.click();
   }
@@ -412,7 +412,6 @@ function updateGenerateState() {
   const disabled = !(hasKey && hasFile);
   const btn = document.getElementById('genBtn');
   btn.disabled = disabled;
-  btn.setAttribute('aria-disabled', String(disabled));
   btn.title = disabled ? 'Enter API key and upload a PDF to enable generation.' : 'Generate compliance matrix';
 }
 
