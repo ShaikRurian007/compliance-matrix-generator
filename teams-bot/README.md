@@ -52,6 +52,62 @@ This bot lets Teams users upload an RFP PDF in chat, analyse it with Gemini, and
 3. Register the bot in the app manifest using the Azure Bot app ID.
 4. Install the app into a team or personal scope.
 
+## Tenant-ready checklist (Azure + Teams Developer Portal)
+
+Use this checklist to integrate the completed bot into your Teams tenant.
+
+1. **Create Azure Bot registration**
+   - Azure Portal → **Create resource** → search **Azure Bot**.
+   - Create with your subscription/resource group.
+   - Save:
+     - **Microsoft App ID**
+     - **Client secret** (App password)
+
+2. **Enable Teams channel**
+   - Open your Azure Bot resource.
+   - Go to **Channels**.
+   - Add/enable **Microsoft Teams**.
+
+3. **Deploy the bot service (`teams-bot/`)**
+   - Deploy to **Azure App Service** or **Azure Container Apps**.
+   - Ensure the app is reachable via HTTPS.
+
+4. **Set Azure app settings (exact keys)**
+   - `MicrosoftAppId` = your Azure Bot Microsoft App ID
+   - `MicrosoftAppPassword` = your Azure Bot client secret
+   - `GEMINI_API_KEY` = optional shared Gemini key
+   - `GEMINI_MODEL` = optional (default: `gemini-2.0-flash`)
+
+5. **Set Bot messaging endpoint**
+   - In Azure Bot resource, set:
+   - `https://<your-app-domain>/api/messages`
+   - Example: `https://my-compliance-bot.azurewebsites.net/api/messages`
+
+6. **Create Teams app in Developer Portal**
+   - Teams Developer Portal → **Apps** → **New app**.
+   - Fill basic info (name, descriptions, icons, developer details).
+   - Add **Bot** capability:
+     - Bot type: existing bot
+     - Bot/App ID: same Azure Bot Microsoft App ID
+     - Scopes: choose **Personal** and/or **Team**
+
+7. **Configure install & permissions**
+   - Set app availability for your org (or specific users/groups as needed).
+   - If your tenant requires admin consent/publishing workflow, submit accordingly.
+
+8. **Publish and install**
+   - In Developer Portal, **Preview in Teams** (or **Publish** to org catalog).
+   - Install in personal chat or a team/channel based on selected scopes.
+
+9. **Smoke test in Teams**
+   - Send a hello message to the bot.
+   - Upload an RFP PDF.
+   - Confirm you receive the generated Excel file.
+   - Optional commands:
+     - `key <value>`
+     - `model flash` / `model flash-lite` / `model 1.5-flash`
+     - `reset`
+
 ## GitHub Actions deployment
 The workflow at `.github/workflows/deploy-teams-bot.yml` builds the bot on pushes to `main`.
 

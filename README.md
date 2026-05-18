@@ -14,4 +14,4 @@ It supports:
 - uploading PDF files from Teams
 - returning the generated compliance matrix as an Excel attachment
 
-See `teams-bot/README.md` for setup, Azure registration, Teams installation, and deployment details.
+See `teams-bot/README.md` for setup, Azure registration, Teams installation, deployment details, and the **Tenant-ready checklist (Azure + Teams Developer Portal)** section for exact integration steps.
