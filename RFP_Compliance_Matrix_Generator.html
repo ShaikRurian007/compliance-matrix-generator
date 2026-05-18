@@ -14,42 +14,43 @@
   --text:#1a2535; --muted:#6b7a99;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.45;}
 
 /* ── HEADER ── */
 .hdr{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);
-  padding:18px 36px;display:flex;align-items:center;gap:14px;
+  padding:clamp(12px,2.2vw,18px) clamp(14px,4vw,36px);display:flex;align-items:center;gap:14px;
   box-shadow:0 3px 16px rgba(0,0,0,.28);position:sticky;top:0;z-index:100;}
 .hdr-icon{width:44px;height:44px;background:rgba(255,255,255,.13);border-radius:10px;
   display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.hdr h1{color:#fff;font-size:19px;font-weight:700;}
+.hdr h1{color:#fff;font-size:clamp(16px,2.4vw,19px);font-weight:700;}
 .hdr p{color:rgba(255,255,255,.65);font-size:11px;margin-top:2px;}
 .hdr-badge{margin-left:auto;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
   color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
 
 /* ── LAYOUT ── */
-.main{max-width:780px;margin:28px auto;padding:0 18px 60px;display:flex;flex-direction:column;gap:18px;}
+.main{width:min(100%,1100px);margin:clamp(14px,2.5vw,28px) auto;padding:0 clamp(12px,2.5vw,18px) 60px;display:flex;flex-direction:column;gap:18px;}
 
 /* ── CARD ── */
-.card{background:var(--card);border-radius:14px;padding:22px 24px;
+.card{background:var(--card);border-radius:14px;padding:clamp(16px,2.3vw,24px);
   box-shadow:0 2px 10px rgba(0,0,0,.07);border:1px solid var(--border);}
 .ctitle{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;
   color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
 .ctitle::after{content:'';flex:1;height:1px;background:var(--border);}
 
 /* ── FORM ── */
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;}
 .f-full{grid-column:1/-1;}
 .fl{display:flex;flex-direction:column;gap:5px;}
 .fl label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-.fl input,.fl select{padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;
-  font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s;color:var(--text);}
+.fl input,.fl select{padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:14px;min-height:44px;outline:none;transition:border-color .2s,box-shadow .2s;color:var(--text);}
 .fl input:focus,.fl select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(68,114,196,.13);}
 .hint{font-size:10px;color:var(--muted);}
 
 /* ── UPLOAD ── */
-.upzone{border:2px dashed var(--border);border-radius:10px;padding:40px 20px;text-align:center;
+.upzone{border:2px dashed var(--border);border-radius:10px;padding:clamp(24px,5vw,40px) 20px;text-align:center;
   cursor:pointer;transition:all .2s;background:#f8fafd;position:relative;}
+.upzone:focus-visible{outline:3px solid rgba(68,114,196,.32);outline-offset:2px;}
 .upzone:hover{border-color:var(--blue);background:#f0f4fc;}
 .upzone.drag{border-color:var(--orange);background:#fff8f5;}
 .upzone.ready{border-color:var(--green);background:#f0faf4;border-style:solid;}
@@ -73,7 +74,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .fstrip-rm:hover{background:#fee2e2;}
 
 /* ── GENERATE BUTTON ── */
-.btn-gen{width:100%;padding:15px;
+.btn-gen{width:100%;padding:15px;min-height:48px;
   background:linear-gradient(135deg,var(--orange) 0%,#c0451a 100%);
   color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;
   cursor:pointer;transition:all .2s;display:flex;align-items:center;
@@ -178,12 +179,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .stat{text-align:center;padding:15px;background:#f8f9fb;border-radius:9px;border:1px solid var(--border);}
 .stat-n{font-size:28px;font-weight:900;color:var(--navy);}
 .stat-l{font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;}
-.btn-dl{width:100%;padding:13px;background:linear-gradient(135deg,var(--navy),var(--navy2));
+.btn-dl{width:100%;padding:13px;min-height:46px;background:linear-gradient(135deg,var(--navy),var(--navy2));
   color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:9px;
   box-shadow:0 4px 14px rgba(31,56,100,.22);transition:all .2s;}
 .btn-dl:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(31,56,100,.28);}
-.btn-new{width:100%;padding:11px;background:#fff;color:var(--navy);
+.btn-new{width:100%;padding:11px;min-height:44px;background:#fff;color:var(--navy);
   border:2px solid var(--navy);border-radius:10px;font-size:13px;
   font-weight:700;cursor:pointer;margin-top:9px;transition:all .2s;}
 .btn-new:hover{background:#f0f4fc;}
@@ -191,11 +192,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .foot{text-align:center;font-size:10px;color:var(--muted);padding:10px;
   background:var(--card);border-radius:10px;border:1px solid var(--border);}
 
-@media(max-width:580px){
+@media(max-width:900px){
+  .stats{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));}
+}
+
+@media(max-width:640px){
+  .hdr{gap:10px;flex-wrap:wrap;position:static;}
+  .hdr-badge{margin-left:0;}
+  .up-t{font-size:14px;}
+  .step{padding:12px;}
+}
+
+@media(max-width:420px){
   .fg{grid-template-columns:1fr;}
   .stats{grid-template-columns:1fr;}
-  .hdr{padding:14px 18px;}
-  .main{margin:14px auto;}
+  .suc-banner{padding:15px;}
+  .suc-banner h3{font-size:15px;}
+  .suc-banner p{font-size:11px;}
 }
 </style>
 </head>
@@ -217,12 +230,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <div class="ctitle">⚙️ Configuration</div>
     <div class="fg">
       <div class="fl f-full">
-        <label>Gemini API Key</label>
+        <label for="apiKey">Gemini API Key</label>
         <input type="password" id="apiKey" placeholder="AIzaSy...">
         <span class="hint">🔒 Sent only to Google's API — never stored anywhere.</span>
       </div>
       <div class="fl">
-        <label>AI Model</label>
+        <label for="mdl">AI Model</label>
         <select id="mdl">
           <option value="gemini-2.0-flash" selected>⚡ Gemini 2.0 Flash (Recommended)</option>
           <option value="gemini-1.5-pro">🔹 Gemini 1.5 Pro (More thorough)</option>
@@ -230,7 +243,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
         </select>
       </div>
       <div class="fl">
-        <label>Contractor / Company Name <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <label for="contractor">Contractor / Company Name <span style="font-weight:400;text-transform:none">(optional)</span></label>
         <input type="text" id="contractor" placeholder="e.g., Clean Harbors Environmental Services">
       </div>
     </div>
@@ -239,7 +252,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <!-- UPLOAD -->
   <div class="card">
     <div class="ctitle">📄 Upload RFP Document</div>
-    <div class="upzone" id="upzone">
+    <div class="upzone" id="upzone" role="button" tabindex="0" aria-label="Upload RFP PDF">
       <input type="file" id="rfpFile" accept="application/pdf">
       <div class="up-icon" id="upIco">📂</div>
       <div class="up-t" id="upT">Click to browse or drag & drop your RFP</div>
@@ -257,12 +270,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
 
   <!-- GENERATE -->
-  <button class="btn-gen" id="genBtn" onclick="go()">
+  <button class="btn-gen" id="genBtn" onclick="go()" disabled>
     <span>🚀</span> Generate Compliance Matrix
   </button>
 
   <!-- ERROR -->
-  <div class="errbox" id="errbox"></div>
+  <div class="errbox" id="errbox" role="alert" aria-live="polite"></div>
 
   <!-- PROGRESS -->
   <div class="card prog-card" id="progCard">
@@ -350,9 +363,14 @@ const timers = {};
 /* ═══════════════════════ UPLOAD ═══════════════════════ */
 const zone = document.getElementById('upzone');
 const inp  = document.getElementById('rfpFile');
+const apiKeyInput = document.getElementById('apiKey');
 
 zone.addEventListener('click', () => inp.click());
+zone.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inp.click(); }
+});
 inp.addEventListener('change', e => { if(e.target.files[0]) setFile(e.target.files[0]); });
+apiKeyInput.addEventListener('input', updateGenerateState);
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
 zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
 zone.addEventListener('drop', e => {
@@ -372,6 +390,7 @@ function setFile(f) {
   document.getElementById('fsize').textContent = fmtBytes(f.size);
   document.getElementById('fstrip').classList.add('vis');
   hideErr();
+  updateGenerateState();
 }
 function rmFile() {
   curFile = null; inp.value = '';
@@ -380,8 +399,15 @@ function rmFile() {
   document.getElementById('upT').textContent   = 'Click to browse or drag & drop your RFP';
   document.getElementById('upS').textContent   = 'PDF format only';
   document.getElementById('fstrip').classList.remove('vis');
+  updateGenerateState();
 }
 const fmtBytes = b => b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB';
+
+function updateGenerateState() {
+  const hasKey = document.getElementById('apiKey').value.trim().length > 0;
+  const hasFile = !!curFile;
+  document.getElementById('genBtn').disabled = !(hasKey && hasFile);
+}
 
 /* ═══════════════════════ STEPS ═══════════════════════ */
 function setStep(n, state) { // 'active'|'done'|'errored'
@@ -459,6 +485,7 @@ function reset() {
   document.getElementById('sucCard').classList.remove('vis');
   document.getElementById('progCard').classList.remove('vis');
   resetSteps();
+  updateGenerateState();
 }
 
 function showSuccess(data, fn) {
@@ -811,6 +838,8 @@ function sheet3(wb, data, num, short) {
 
   ws.views=[{state:'frozen',ySplit:2}];
 }
+
+updateGenerateState();
 </script>
 </body>
 </html>
