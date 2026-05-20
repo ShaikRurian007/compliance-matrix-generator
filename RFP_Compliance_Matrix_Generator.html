@@ -241,7 +241,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <p>AI-powered · Google Gemini · Professional Excel output</p>
   </div>
   <div class="hdr-badge">v3.0</div>
-  <button type="button" class="theme-btn" id="themeBtn" aria-label="Toggle theme" aria-pressed="false">🌙 Dark</button>
+  <button type="button" class="theme-btn" id="themeBtn" aria-label="Toggle theme">🌙 Dark</button>
 </div>
 
 <div class="main">
@@ -399,7 +399,6 @@ let curFile = null, lastBuf = null, lastFn = '';
 const timers = {};
 const GEN_HINT_DISABLED = 'Enter API key, all mandatory fields, and upload a document to enable this button.';
 const GEN_HINT_READY = 'Ready to generate your compliance matrix.';
-const ALLOWED_FILE_ERROR = 'Please upload a PDF, DOC, or DOCX file.';
 const REQUIRED_FIELDS = ['winId','businessUnit','competitorsOnBid','existingBusiness'];
 const EXT_TO_MIME = {
   pdf:'application/pdf',
@@ -408,6 +407,10 @@ const EXT_TO_MIME = {
 };
 const ALLOWED_MIME_TYPES = new Set(Object.values(EXT_TO_MIME));
 const ALLOWED_EXTENSIONS = new Set(Object.keys(EXT_TO_MIME));
+const ALLOWED_FILE_ERROR = `Please upload a ${Array.from(ALLOWED_EXTENSIONS).map(e => e.toUpperCase()).join(', ')} file.`;
+const LEGAL_REVIEW_FALLBACK = 'Needs manual review — AI did not return legal review assessment.';
+const LEGAL_REQUIRED_VALUES = new Set(['yes','required','true']);
+const LEGAL_NOT_REQUIRED_VALUES = new Set(['no','not required','false']);
 
 /* ═══════════════════════ UPLOAD ═══════════════════════ */
 const zone = document.getElementById('upzone');
@@ -546,6 +549,7 @@ async function go() {
     setStep(1,'active');
     const b64 = await toB64(curFile);
     const mimeType = effectiveMimeType(curFile);
+    if(!mimeType || !ALLOWED_MIME_TYPES.has(mimeType)) throw new Error(ALLOWED_FILE_ERROR);
     setStep(1,'done');
 
     setStep(2,'active');
@@ -860,23 +864,25 @@ function normLabel(v=''){ return String(v).toLowerCase().replace(/[^a-z0-9]+/g,'
 function deriveLegalReview(data) {
   const lr = data?.legalReviewRequirement;
   if(typeof lr === 'string') {
-    return {details:lr.trim() || 'Needs manual review — AI did not return legal review assessment.', rfpPage:''};
+    return {details:lr.trim() || LEGAL_REVIEW_FALLBACK, rfpPage:''};
   }
   if(lr && typeof lr === 'object') {
     const requiredRaw = String(lr.required ?? '').trim().toLowerCase();
-    const decision = requiredRaw === 'yes' || requiredRaw === 'required' || requiredRaw === 'true'
+    const decision = LEGAL_REQUIRED_VALUES.has(requiredRaw)
       ? 'Required'
-      : requiredRaw === 'no' || requiredRaw === 'not required' || requiredRaw === 'false'
+      : LEGAL_NOT_REQUIRED_VALUES.has(requiredRaw)
         ? 'Not Required'
         : 'Undetermined';
     const reason = String(lr.reason ?? '').trim();
-    const rfpPage = String(lr.rfpPage ?? lr.rfpPages ?? lr.pageNumbers ?? '').trim();
+    // Check multiple keys because model output can vary in field naming.
+    const legalPageKeys = ['rfpPage','rfpPages','pageNumbers'];
+    const rfpPage = String(legalPageKeys.map(k => lr[k]).find(v => v != null) ?? '').trim();
     const details = `${decision}${reason ? ` — ${reason}` : ''}${rfpPage ? ` (Pages: ${rfpPage})` : ''}`.trim();
-    return {details:details || 'Needs manual review — AI did not return legal review assessment.', rfpPage};
+    return {details:details || LEGAL_REVIEW_FALLBACK, rfpPage};
   }
   const fallback = (data?.general || []).find(r => normLabel(r?.field || '').includes('legal review'));
-  if(fallback) return {details:String(fallback.details || '').trim() || 'Needs manual review — AI did not return legal review assessment.', rfpPage:String(fallback.rfpPage || '').trim()};
-  return {details:'Needs manual review — AI did not return legal review assessment.', rfpPage:''};
+  if(fallback) return {details:String(fallback.details || '').trim() || LEGAL_REVIEW_FALLBACK, rfpPage:String(fallback.rfpPage || '').trim()};
+  return {details:LEGAL_REVIEW_FALLBACK, rfpPage:''};
 }
 
 function buildGeneralRows(data, metadata) {
@@ -999,8 +1005,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-  const next = current === 'dark' ? 'light' : 'dark';
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('rfp-theme', next);
   themeBtn.textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
