@@ -241,7 +241,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <p>AI-powered · Google Gemini · Professional Excel output</p>
   </div>
   <div class="hdr-badge">v3.0</div>
-  <button type="button" class="theme-btn" id="themeBtn" aria-label="Toggle theme">🌙 Dark</button>
+  <button type="button" class="theme-btn" id="themeBtn" aria-label="Toggle between light and dark theme">🌙 Dark</button>
 </div>
 
 <div class="main">
@@ -411,6 +411,7 @@ const ALLOWED_FILE_ERROR = `Please upload a ${Array.from(ALLOWED_EXTENSIONS).map
 const LEGAL_REVIEW_FALLBACK = 'Needs manual review — AI did not return legal review assessment.';
 const LEGAL_REQUIRED_VALUES = new Set(['yes','required','true']);
 const LEGAL_NOT_REQUIRED_VALUES = new Set(['no','not required','false']);
+const MAX_SAFE_FILENAME_LEN = 38;
 
 /* ═══════════════════════ UPLOAD ═══════════════════════ */
 const zone = document.getElementById('upzone');
@@ -852,7 +853,7 @@ async function buildExcel(data, srcName, metadata) {
   sheet2(wb, data, num, short);
   sheet3(wb, data, num, short);
 
-  const safe = srcName.replace(/\.(pdf|doc|docx)$/i,'').replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,38);
+  const safe = srcName.replace(/\.(pdf|doc|docx)$/i,'').replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,MAX_SAFE_FILENAME_LEN);
   const fn   = `Compliance_Matrix_RFP${num}_${safe}.xlsx`;
   const buf  = await wb.xlsx.writeBuffer();
   return {buf, fn};
@@ -917,7 +918,7 @@ function sheet1(wb, data, title, num, short, metadata) {
   rows.forEach((item,i) => {
     const isAlt = i%2===1;
     const row = ws.addRow([]); row.height=42;
-    dataCell(row.getCell(1), i+1, isAlt, 'center');
+    dataCell(row.getCell(1), item.srNo || (i+1), isAlt, 'center');
     dataCell(row.getCell(2), item.field||'', isAlt);
     dataCell(row.getCell(3), item.details||'', isAlt);
     dataCell(row.getCell(4), item.rfpPage||'', isAlt, 'center');
