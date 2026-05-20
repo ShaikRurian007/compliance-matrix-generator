@@ -13,6 +13,12 @@
   --bg:#eaeff7; --card:#fff; --border:#cdd5e0;
   --text:#1a2535; --muted:#6b7a99;
 }
+[data-theme="dark"]{
+  --navy:#0f223f; --navy2:#1c365c; --blue:#7aa2ff;
+  --orange:#f07a4e; --green:#22a861; --green2:#2fcf78;
+  --bg:#0f1623; --card:#172131; --border:#324258;
+  --text:#e8edf7; --muted:#a9b6cf;
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.45;}
 
@@ -26,6 +32,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .hdr p{color:rgba(255,255,255,.65);font-size:11px;margin-top:2px;}
 .hdr-badge{margin-left:auto;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
   color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
+.theme-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;
+  font-size:12px;font-weight:700;padding:7px 10px;border-radius:9px;transition:all .2s;min-height:34px;}
+.theme-btn:hover{background:rgba(255,255,255,.22);}
 
 /* ── LAYOUT ── */
 .main{width:min(100%,900px);margin:clamp(14px,2.5vw,28px) auto;padding:0 clamp(12px,2.5vw,18px) 60px;display:flex;flex-direction:column;gap:18px;}
@@ -108,6 +117,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 /* base step */
 .step{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:11px;
   background:#f4f6fb;border:1.5px solid var(--border);transition:all .35s;}
+[data-theme="dark"] .step{background:#1a2638;}
 
 .step.active{background:#eff6ff;border-color:#93c5fd;
   box-shadow:0 0 0 3px rgba(59,130,246,.1);}
@@ -180,6 +190,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .suc-banner p{font-size:12px;opacity:.85;margin-top:3px;}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:17px;}
 .stat{text-align:center;padding:15px;background:#f8f9fb;border-radius:9px;border:1px solid var(--border);}
+[data-theme="dark"] .stat{background:#1b283a;}
 .stat-n{font-size:28px;font-weight:900;color:var(--navy);}
 .stat-l{font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;}
 .btn-dl{width:100%;padding:13px;min-height:46px;background:linear-gradient(135deg,var(--navy),var(--navy2));
@@ -194,6 +205,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 .foot{text-align:center;font-size:10px;color:var(--muted);padding:10px;
   background:var(--card);border-radius:10px;border:1px solid var(--border);}
+[data-theme="dark"] .upzone{background:#141f2f;}
+[data-theme="dark"] .upzone:hover{background:#1a2840;}
+[data-theme="dark"] .upzone.drag{background:#2f211f;}
+[data-theme="dark"] .fstrip{background:#1a2f26;border-color:#2f8f5f;}
+[data-theme="dark"] .btn-new:hover{background:#1c2a42;}
 
 @media(max-width:900px){
   .stats{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));}
@@ -225,6 +241,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <p>AI-powered · Google Gemini · Professional Excel output</p>
   </div>
   <div class="hdr-badge">v3.0</div>
+  <button type="button" class="theme-btn" id="themeBtn" aria-label="Toggle between light and dark theme">🌙 Dark</button>
 </div>
 
 <div class="main">
@@ -250,18 +267,34 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
         <label for="contractor">Contractor / Company Name <span style="font-weight:400;text-transform:none">(optional)</span></label>
         <input type="text" id="contractor" placeholder="e.g., Clean Harbors Environmental Services">
       </div>
+      <div class="fl">
+        <label for="winId">WIN ID <span style="color:#c0392b">*</span></label>
+        <input type="text" id="winId" placeholder="e.g., WIN-2026-001">
+      </div>
+      <div class="fl">
+        <label for="businessUnit">Business Unit / Organization Name <span style="color:#c0392b">*</span></label>
+        <input type="text" id="businessUnit" placeholder="e.g., Clean Harbors Environmental Services">
+      </div>
+      <div class="fl">
+        <label for="competitorsOnBid">Competitors on Bid <span style="color:#c0392b">*</span></label>
+        <input type="text" id="competitorsOnBid" placeholder="e.g., Company A, Company B">
+      </div>
+      <div class="fl">
+        <label for="existingBusiness">Existing Business <span style="color:#c0392b">*</span></label>
+        <input type="text" id="existingBusiness" placeholder="e.g., Existing customer support contract">
+      </div>
     </div>
   </div>
 
   <!-- UPLOAD -->
   <div class="card">
     <div class="ctitle">📄 Upload RFP Document</div>
-    <input type="file" id="rfpFile" accept="application/pdf" aria-label="Upload RFP PDF file">
-    <button type="button" class="upzone" id="upzone" aria-label="Upload RFP PDF">
+    <input type="file" id="rfpFile" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="Upload RFP file">
+    <button type="button" class="upzone" id="upzone" aria-label="Upload RFP file">
       <div class="up-icon" id="upIco">📂</div>
       <div class="up-t" id="upT">Click to browse or drag & drop your RFP</div>
-      <div class="up-s" id="upS">PDF format only</div>
-      <div class="up-tag">PDF</div>
+      <div class="up-s" id="upS">PDF or Word format</div>
+      <div class="up-tag">PDF / DOC / DOCX</div>
     </button>
     <div class="fstrip" id="fstrip">
       <div class="fstrip-ico">📄</div>
@@ -364,31 +397,78 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 /* ═══════════════════════ STATE ═══════════════════════ */
 let curFile = null, lastBuf = null, lastFn = '';
 const timers = {};
-const GEN_HINT_DISABLED = 'Enter API key and upload a PDF to enable this button.';
+const GEN_HINT_DISABLED = 'Enter API key, all mandatory fields, and upload a document to enable this button.';
 const GEN_HINT_READY = 'Ready to generate your compliance matrix.';
+const REQUIRED_FIELDS = ['winId','businessUnit','competitorsOnBid','existingBusiness'];
+const EXT_TO_MIME = {
+  pdf:'application/pdf',
+  doc:'application/msword',
+  docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+};
+const ALLOWED_MIME_TYPES = new Set(Object.values(EXT_TO_MIME));
+const ALLOWED_EXTENSIONS = new Set(Object.keys(EXT_TO_MIME));
+const ALLOWED_FILE_ERROR = `Please upload a ${Array.from(ALLOWED_EXTENSIONS).map(e => e.toUpperCase()).join(', ')} file.`;
+const LEGAL_REVIEW_FALLBACK = 'Needs manual review — AI did not return legal review assessment.';
+const LEGAL_REQUIRED_VALUES = new Set(['yes','required','true']);
+const LEGAL_NOT_REQUIRED_VALUES = new Set(['no','not required','false']);
+const MAX_SAFE_FILENAME_LEN = 38;
 
 /* ═══════════════════════ UPLOAD ═══════════════════════ */
 const zone = document.getElementById('upzone');
 const inp  = document.getElementById('rfpFile');
 const apiKeyInput = document.getElementById('apiKey');
+const themeBtn = document.getElementById('themeBtn');
 
 zone.addEventListener('click', () => inp.click());
-inp.addEventListener('change', e => { if(e.target.files[0]) setFile(e.target.files[0]); });
+inp.addEventListener('change', e => {
+  if(!e.target.files[0]) return;
+  const f = e.target.files[0];
+  if(!isSupportedFile(f)) { showErr(ALLOWED_FILE_ERROR); inp.value=''; return; }
+  setFile(f);
+});
 apiKeyInput.addEventListener('input', updateGenerateState);
+REQUIRED_FIELDS.forEach(id => document.getElementById(id).addEventListener('input', updateGenerateState));
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
 zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
 zone.addEventListener('drop', e => {
   e.preventDefault(); zone.classList.remove('drag');
   const f = e.dataTransfer.files[0];
-  if(f && f.type === 'application/pdf') setFile(f);
-  else showErr('Please drop a PDF file.');
+  if(f && isSupportedFile(f)) setFile(f);
+  else showErr(ALLOWED_FILE_ERROR);
 });
 
+themeBtn.addEventListener('click', toggleTheme);
+
+function fileExt(name='') {
+  const i = name.lastIndexOf('.');
+  if(i <= 0 || i === name.length - 1) return '';
+  return name.slice(i + 1).toLowerCase();
+}
+
+function effectiveMimeType(f) {
+  if(f?.type && ALLOWED_MIME_TYPES.has(f.type)) return f.type;
+  const ext = fileExt(f?.name || '');
+  if(ext && EXT_TO_MIME[ext]) return EXT_TO_MIME[ext];
+  return f?.type || '';
+}
+
+function isSupportedFile(f) {
+  if(!f) return false;
+  const ext = fileExt(f.name || '');
+  return ALLOWED_MIME_TYPES.has(f.type) || ALLOWED_EXTENSIONS.has(ext);
+}
+
+function fileTypeLabel(f) {
+  const ext = fileExt(f?.name || '');
+  return ext ? ext.toUpperCase() : 'FILE';
+}
+
 function setFile(f) {
+  if(!isSupportedFile(f)) { showErr(ALLOWED_FILE_ERROR); return; }
   curFile = f;
   zone.classList.add('ready');
   document.getElementById('upIco').textContent = '✅';
-  document.getElementById('upT').textContent   = 'PDF ready — click Generate to start';
+  document.getElementById('upT').textContent   = `${fileTypeLabel(f)} ready — click Generate to start`;
   document.getElementById('upS').textContent   = f.name;
   document.getElementById('fname').textContent = f.name;
   document.getElementById('fsize').textContent = fmtBytes(f.size);
@@ -401,7 +481,7 @@ function rmFile() {
   zone.classList.remove('ready');
   document.getElementById('upIco').textContent = '📂';
   document.getElementById('upT').textContent   = 'Click to browse or drag & drop your RFP';
-  document.getElementById('upS').textContent   = 'PDF format only';
+  document.getElementById('upS').textContent   = 'PDF or Word format';
   document.getElementById('fstrip').classList.remove('vis');
   updateGenerateState();
 }
@@ -410,12 +490,13 @@ const fmtBytes = b => b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFi
 function updateGenerateState() {
   const hasKey = document.getElementById('apiKey').value.trim().length > 0;
   const hasFile = !!curFile;
-  const disabled = !(hasKey && hasFile);
+  const hasRequiredFields = REQUIRED_FIELDS.every(id => document.getElementById(id).value.trim().length > 0);
+  const disabled = !(hasKey && hasFile && hasRequiredFields);
   const btn = document.getElementById('genBtn');
   const hint = document.getElementById('genHint');
   btn.disabled = disabled;
   hint.textContent = disabled ? GEN_HINT_DISABLED : GEN_HINT_READY;
-  btn.title = disabled ? 'Enter API key and upload a PDF to enable generation.' : 'Generate compliance matrix';
+  btn.title = disabled ? 'Enter API key, all mandatory fields, and upload a PDF/DOC/DOCX file to enable generation.' : 'Generate compliance matrix';
 }
 
 /* ═══════════════════════ STEPS ═══════════════════════ */
@@ -445,13 +526,21 @@ function hideErr(){ document.getElementById('errbox').classList.remove('vis'); }
 async function go() {
   const key = document.getElementById('apiKey').value.trim();
   const mdl = document.getElementById('mdl').value;
+  const winId = document.getElementById('winId').value.trim();
+  const businessUnit = document.getElementById('businessUnit').value.trim();
+  const competitorsOnBid = document.getElementById('competitorsOnBid').value.trim();
+  const existingBusiness = document.getElementById('existingBusiness').value.trim();
   hideErr();
   document.getElementById('sucCard').classList.remove('vis');
   document.getElementById('progCard').classList.remove('vis');
   resetSteps();
 
   if(!key)     { showErr('Please enter your Gemini API key.'); return; }
-  if(!curFile) { showErr('Please upload an RFP PDF file first.'); return; }
+  if(!winId) { showErr('Please enter WIN ID.'); return; }
+  if(!businessUnit) { showErr('Please enter Business Unit / Organization Name.'); return; }
+  if(!competitorsOnBid) { showErr('Please enter Competitors on Bid.'); return; }
+  if(!existingBusiness) { showErr('Please enter Existing Business.'); return; }
+  if(!curFile) { showErr('Please upload an RFP document first.'); return; }
 
   const btn = document.getElementById('genBtn');
   btn.disabled = true;
@@ -460,10 +549,12 @@ async function go() {
   try {
     setStep(1,'active');
     const b64 = await toB64(curFile);
+    const mimeType = effectiveMimeType(curFile);
+    if(!mimeType || !ALLOWED_MIME_TYPES.has(mimeType)) throw new Error(ALLOWED_FILE_ERROR);
     setStep(1,'done');
 
     setStep(2,'active');
-    const raw = await callGemini(b64, mdl, key);
+    const raw = await callGemini(b64, mimeType, mdl, key);
     setStep(2,'done');
 
     setStep(3,'active');
@@ -473,7 +564,8 @@ async function go() {
 
     setStep(4,'active');
     const cont = document.getElementById('contractor').value.trim();
-    const {buf, fn} = await buildExcel(data, curFile.name, cont);
+    const metadata = {contractor:cont, winId, businessUnit, competitorsOnBid, existingBusiness};
+    const {buf, fn} = await buildExcel(data, curFile.name, metadata);
     lastBuf = buf; lastFn = fn;
     download(buf, fn);
     setStep(4,'done');
@@ -533,7 +625,7 @@ function normStatus(raw) {
 }
 
 /* ═══════════════════════ GEMINI API ═══════════════════════ */
-async function callGemini(b64, mdl, key) {
+async function callGemini(b64, mimeType, mdl, key) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${mdl}:generateContent?key=${key}`;
 
   const prompt = `You are a senior compliance and proposal manager with deep expertise in government RFP analysis.
@@ -546,6 +638,7 @@ JSON SCHEMA (follow exactly):
   "clientName": "Full official client name",
   "clientShortName": "Short client name (e.g. Cattaraugus County – DPW)",
   "submissionDeadline": "Full deadline text",
+  "legalReviewRequirement": {"required":"Yes or No","reason":"Why legal review is or is not required","rfpPage":"Page number(s) supporting this decision"},
   "general": [
     {"srNo":1,"field":"Category","details":"Comprehensive details. Use 1. 2. 3. for multiple points.","rfpPage":"Page X","notes":"⚠ warning or empty string"}
   ],
@@ -580,6 +673,12 @@ GENERAL SHEET — extract ALL of these fields:
 12. Key Contractor Obligations — top-level duties specific to this RFP
 Add additional fields for any other unique summary items.
 
+LEGAL REVIEW REQUIREMENT (mandatory output):
+- Decide if legal review is required ("Yes" or "No")
+- Provide concise reason for the decision
+- Provide exact supporting page reference(s) where possible
+- Be explicit and audit-ready
+
 DETAILED SHEET — extract EVERY requirement grouped into sections. Use these section headers:
 • SUBMISSION REQUIREMENTS
 • REQUIRED FORMS & CERTIFICATIONS
@@ -606,7 +705,7 @@ Number items from 1 within each section. Populate this section FULLY — do not 
 Be exhaustive. Extract every individual requirement as its own row.`;
 
   const body = {
-    contents:[{parts:[{text:prompt},{inline_data:{mime_type:'application/pdf',data:b64}}]}],
+    contents:[{parts:[{text:prompt},{inline_data:{mime_type:mimeType,data:b64}}]}],
     generationConfig:{response_mime_type:'application/json',temperature:0.1,maxOutputTokens:16384}
   };
 
@@ -742,7 +841,7 @@ function dataCell(cell, val, isAlt, align) {
 }
 
 /* ═══════════════════════ EXCEL BUILD ═══════════════════════ */
-async function buildExcel(data, srcName, contractor) {
+async function buildExcel(data, srcName, metadata) {
   const wb  = new ExcelJS.Workbook();
   wb.creator='RFP Matrix Generator v3'; wb.created=new Date();
 
@@ -750,28 +849,76 @@ async function buildExcel(data, srcName, contractor) {
   const short = data.clientShortName || data.clientName || '';
   const title = data.rfpTitle || 'Request for Proposal';
 
-  sheet1(wb, data, title, num, short);
+  sheet1(wb, data, title, num, short, metadata);
   sheet2(wb, data, num, short);
   sheet3(wb, data, num, short);
 
-  const safe = srcName.replace(/\.pdf$/i,'').replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,38);
+  const safe = srcName.replace(/\.(pdf|doc|docx)$/i,'').replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,MAX_SAFE_FILENAME_LEN);
   const fn   = `Compliance_Matrix_RFP${num}_${safe}.xlsx`;
   const buf  = await wb.xlsx.writeBuffer();
   return {buf, fn};
 }
 
 /* ── Sheet 1 ── */
-function sheet1(wb, data, title, num, short) {
+function normLabel(v=''){ return String(v).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+
+function deriveLegalReview(data) {
+  const lr = data?.legalReviewRequirement;
+  if(typeof lr === 'string') {
+    return {details:lr.trim() || LEGAL_REVIEW_FALLBACK, rfpPage:''};
+  }
+  if(lr && typeof lr === 'object') {
+    const requiredRaw = String(lr.required ?? '').trim().toLowerCase();
+    const decision = LEGAL_REQUIRED_VALUES.has(requiredRaw)
+      ? 'Required'
+      : LEGAL_NOT_REQUIRED_VALUES.has(requiredRaw)
+        ? 'Not Required'
+        : 'Undetermined';
+    const reason = String(lr.reason ?? '').trim();
+    // Check multiple keys because model output can vary in field naming.
+    const legalPageKeys = ['rfpPage','rfpPages','pageNumbers'];
+    const rfpPage = String(legalPageKeys.map(k => lr[k]).find(v => v != null) ?? '').trim();
+    const details = `${decision}${reason ? ` — ${reason}` : ''}${rfpPage ? ` (Pages: ${rfpPage})` : ''}`.trim();
+    return {details:details || LEGAL_REVIEW_FALLBACK, rfpPage};
+  }
+  const fallback = (data?.general || []).find(r => normLabel(r?.field || '').includes('legal review'));
+  if(fallback) return {details:String(fallback.details || '').trim() || LEGAL_REVIEW_FALLBACK, rfpPage:String(fallback.rfpPage || '').trim()};
+  return {details:LEGAL_REVIEW_FALLBACK, rfpPage:''};
+}
+
+function buildGeneralRows(data, metadata) {
+  const existingRows = [...(data.general || [])];
+  const scopeIdx = existingRows.findIndex(r => normLabel(r.field || '').startsWith('scope of work'));
+  const legal = deriveLegalReview(data);
+  const beforeScope = [{field:'WIN ID', details:metadata.winId, rfpPage:'User Input', notes:''}];
+  const afterScope = [
+    {field:'Business Unit / Organization Name', details:metadata.businessUnit, rfpPage:'User Input', notes:''},
+    {field:'Competitors on Bid', details:metadata.competitorsOnBid, rfpPage:'User Input', notes:''},
+    {field:'Existing Business', details:metadata.existingBusiness, rfpPage:'User Input', notes:''},
+    {field:'Legal Review Requirement', details:legal.details, rfpPage:legal.rfpPage || 'AI Analysis', notes:''}
+  ];
+  if(scopeIdx === -1) return [...beforeScope, ...afterScope, ...existingRows];
+  return [
+    ...existingRows.slice(0, scopeIdx),
+    ...beforeScope,
+    existingRows[scopeIdx],
+    ...afterScope,
+    ...existingRows.slice(scopeIdx + 1)
+  ];
+}
+
+function sheet1(wb, data, title, num, short, metadata) {
   const ws = wb.addWorksheet('Compliance Matrix General');
   const NC = 5;
 
   titleRow(ws, `REQUEST FOR PROPOSAL  ·  ${title}  ·  ${short}  |  Proposal No. ${num}`, NC, 34);
   headerRow(ws, ['Sr. No','Field','Details','RFP Page','Notes'], [8,22,72,13,34]);
 
-  (data.general||[]).forEach((item,i) => {
+  const rows = buildGeneralRows(data, metadata);
+  rows.forEach((item,i) => {
     const isAlt = i%2===1;
     const row = ws.addRow([]); row.height=42;
-    dataCell(row.getCell(1), item.srNo||(i+1), isAlt, 'center');
+    dataCell(row.getCell(1), item.srNo || (i+1), isAlt, 'center');
     dataCell(row.getCell(2), item.field||'', isAlt);
     dataCell(row.getCell(3), item.details||'', isAlt);
     dataCell(row.getCell(4), item.rfpPage||'', isAlt, 'center');
@@ -848,7 +995,23 @@ function sheet3(wb, data, num, short) {
   ws.views=[{state:'frozen',ySplit:2}];
 }
 
-window.addEventListener('DOMContentLoaded', updateGenerateState);
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('rfp-theme');
+  const prefersDark = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const darkMode = saved ? saved === 'dark' : prefersDark;
+  document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+  themeBtn.textContent = darkMode ? '☀️ Light' : '🌙 Dark';
+  themeBtn.setAttribute('aria-pressed', darkMode ? 'true' : 'false');
+  updateGenerateState();
+});
+
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('rfp-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
+  themeBtn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
+}
 </script>
 </body>
 </html>
