@@ -241,7 +241,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <p>AI-powered · Google Gemini · Professional Excel output</p>
   </div>
   <div class="hdr-badge">v3.0</div>
-  <button type="button" class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">🌙 Dark</button>
+  <button type="button" class="theme-btn" id="themeBtn" aria-label="Toggle theme" aria-pressed="false">🌙 Dark</button>
 </div>
 
 <div class="main">
@@ -399,13 +399,15 @@ let curFile = null, lastBuf = null, lastFn = '';
 const timers = {};
 const GEN_HINT_DISABLED = 'Enter API key, all mandatory fields, and upload a document to enable this button.';
 const GEN_HINT_READY = 'Ready to generate your compliance matrix.';
+const ALLOWED_FILE_ERROR = 'Please upload a PDF, DOC, or DOCX file.';
 const REQUIRED_FIELDS = ['winId','businessUnit','competitorsOnBid','existingBusiness'];
-const ALLOWED_MIME_TYPES = new Set([
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-]);
-const ALLOWED_EXTENSIONS = new Set(['pdf','doc','docx']);
+const EXT_TO_MIME = {
+  pdf:'application/pdf',
+  doc:'application/msword',
+  docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+};
+const ALLOWED_MIME_TYPES = new Set(Object.values(EXT_TO_MIME));
+const ALLOWED_EXTENSIONS = new Set(Object.keys(EXT_TO_MIME));
 
 /* ═══════════════════════ UPLOAD ═══════════════════════ */
 const zone = document.getElementById('upzone');
@@ -417,7 +419,7 @@ zone.addEventListener('click', () => inp.click());
 inp.addEventListener('change', e => {
   if(!e.target.files[0]) return;
   const f = e.target.files[0];
-  if(!isSupportedFile(f)) { showErr('Please upload a PDF, DOC, or DOCX file.'); inp.value=''; return; }
+  if(!isSupportedFile(f)) { showErr(ALLOWED_FILE_ERROR); inp.value=''; return; }
   setFile(f);
 });
 apiKeyInput.addEventListener('input', updateGenerateState);
@@ -428,22 +430,21 @@ zone.addEventListener('drop', e => {
   e.preventDefault(); zone.classList.remove('drag');
   const f = e.dataTransfer.files[0];
   if(f && isSupportedFile(f)) setFile(f);
-  else showErr('Please drop a PDF, DOC, or DOCX file.');
+  else showErr(ALLOWED_FILE_ERROR);
 });
 
 themeBtn.addEventListener('click', toggleTheme);
 
 function fileExt(name='') {
   const i = name.lastIndexOf('.');
-  return i === -1 ? '' : name.slice(i + 1).toLowerCase();
+  if(i <= 0 || i === name.length - 1) return '';
+  return name.slice(i + 1).toLowerCase();
 }
 
 function effectiveMimeType(f) {
   if(f?.type && ALLOWED_MIME_TYPES.has(f.type)) return f.type;
   const ext = fileExt(f?.name || '');
-  if(ext === 'pdf') return 'application/pdf';
-  if(ext === 'doc') return 'application/msword';
-  if(ext === 'docx') return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  if(ext && EXT_TO_MIME[ext]) return EXT_TO_MIME[ext];
   return f?.type || '';
 }
 
@@ -459,7 +460,7 @@ function fileTypeLabel(f) {
 }
 
 function setFile(f) {
-  if(!isSupportedFile(f)) { showErr('Please upload a PDF, DOC, or DOCX file.'); return; }
+  if(!isSupportedFile(f)) { showErr(ALLOWED_FILE_ERROR); return; }
   curFile = f;
   zone.classList.add('ready');
   document.getElementById('upIco').textContent = '✅';
@@ -989,9 +990,11 @@ function sheet3(wb, data, num, short) {
 
 window.addEventListener('DOMContentLoaded', () => {
   const saved = localStorage.getItem('rfp-theme');
-  const darkMode = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const prefersDark = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const darkMode = saved ? saved === 'dark' : prefersDark;
   document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
   themeBtn.textContent = darkMode ? '☀️ Light' : '🌙 Dark';
+  themeBtn.setAttribute('aria-pressed', darkMode ? 'true' : 'false');
   updateGenerateState();
 });
 
@@ -1001,6 +1004,7 @@ function toggleTheme() {
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('rfp-theme', next);
   themeBtn.textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
+  themeBtn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
 }
 </script>
 </body>
